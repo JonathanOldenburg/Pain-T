@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="ISO-8859-1">
+        <link rel="stylesheet" href="styles.css">
+        <title>Pain-T</title>
+    </head>
+    <body marginwidth="0" marginheight="0">
+        <div id="canvas-ctnx-menu">
+            <ul>
+                <li>
+                    <a id="save-button">Salvar...</a>
+                </li>
+                <li>
+                    <a>Copiar</a>
+                </li>
+                <li>
+                    <a>Configurar</a>
+                </li>
+                
+            </ul>
+        </div>
+        <canvas style="cursor: url('img/cursors/pencil.png') 0 20, pointer" id="screen" width="100%" height="100%" >
+            Seu navegador <span style="text-decoration: line-through;">&eacute; uma bosta</span> n&atilde;o suporta canvas!
+        </canvas>
+        
+        <div class="toolbox" id="toolbox">
+            <input type="color" id="color-picker" />
+            <button id="pen">
+                <img class="icon" src="img/pencil.png" />
+            </button>
+            <button id="rubber">
+                <img class="icon" src="img/eraser.png" />
+            </button>
+        </div>
+        <script src="main.js"></script>
+    </body>
+</html>

@@ -1,0 +1,78 @@
+/* CSS file placeholder. */
+@CHARSET "ISO-8859-1";
+
+body {
+    height: 100%;
+    margin: none;
+}
+
+button, input, div#canvas-ctnx-menu {
+    border: solid 1px #0076ff;
+    border-radius: 3px;
+    background-color: #fcfcfc;
+    background: linear-gradient(#fcfcfc, #ededed);
+    margin: 0;
+}
+
+canvas#screen {
+    background-image: url("../img/transparent_graphic.png");
+}
+
+div#canvas-ctnx-menu {
+    display: none;
+    width: 150px;
+    height: auto;
+    border-color: #818181;
+    border-radius: 5px;
+    box-shadow: 5px 5px 15px #626262;
+}
+div#canvas-ctnx-menu ul {
+    list-style-type: none;
+    font-family: sans-serif;
+    padding: 0;
+}
+div#canvas-ctnx-menu ul li {
+    width: auto;
+    height: auto;
+}
+div#canvas-ctnx-menu ul li a {
+    display: block;
+    text-decoration: none;
+    color: #414141;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    margin-left: -1px;
+    margin-right: -1px;
+    /*border-radius: 3px;*/
+    padding: 2px;
+    padding-left: 20px;
+    border: solid 1px transparent;
+}
+div#canvas-ctnx-menu ul li a:hover{
+    cursor: pointer;
+    color: #f2f2f2;
+    background-color: #0076ff;
+    background: linear-gradient(#3691ff, #0076ff);
+    border-color: #0055b9;
+    align-content: center;
+    
+}
+
+div.toolbox {
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+div.toolbox * {
+    display: block;
+    margin: auto;
+    /*width:  30px;*/
+    /*height: 30px;*/
+}
+
+.icon {
+	width: 20px;
+	height: 20px;
+    margin-top: 3px;
+    margin-left: -2px;
+}
