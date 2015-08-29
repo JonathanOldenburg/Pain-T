@@ -1,48 +1,41 @@
 //---------------------------------------------------------CARREGANDO DADOS GLOBAIS--------------------------------------------
-/**Posição atual do mouse*/
-var mousePosition = {
+var currentcurrentMousePosition = {
     x : 0,
     y : 0
 };
-/**Última posição do mouse*/
 var lastMousePosition = {
         x : 0,
         y : 0
 };
 /** se o usuário está segurando o botão do mouse*/
-var click = false;
-/**contexto da área de desenho*/
+var mouseClicking = false;
+
 var screenContext;
-/**área de desenho*/
+
 var canvas;
-/**modo de desenho (podendo ser: "pen", "eraser")*/
+/** Current tool (can be: "pen", "eraser")*/
 var mode = "pen";
-/** true se o mouse estiver se movendo*/
+/** true if mouse is moving*/
 var mouseMovingStatus = false;
-/** tamanho do brush*/
+
 var brushSize = 2;
 
 window.onload = onLoadCall;
 
-/**
- * Executado quando carrega o app.
- * inicializa os recursos.
- */
 function onLoadCall() {
-    //-----------------------------------------------------------CONFIGURADO A TELA ----------------------------------------------------------
     canvas = document.getElementById("screen");
     configureCanvasSize();
     screenContext = canvas.getContext("2d");
     screenContext.beginPath();
 
-    //------------------------------------------------------ADICIONANDO EVENTOS AOS ELEMENTOS------------------------------------------
+    //------------------------------------------------------EVENTS------------------------------------------
 
     canvas.onmousedown = canvasMouseUpDown;
     canvas.onmouseup = canvasMouseUpDown;
     canvas.onmousemove = canvasMouseMove;
     canvas.oncontextmenu = openCanvasContextMenu;
 
-    document.getElementById("save-button").onclick = save;
+    document.getElementById("save-button").onmouseClick = save;
 
     document.onmouseup = bodyMouseUp;
     document.onkeypress = function (e) {
@@ -57,63 +50,51 @@ function onLoadCall() {
     }
     window.onresize = onResize;
     
-    /**
-     * Adiciona função para ligar e desligar botões de caneta e borracha;
-     */
-    document.getElementById("pen").onclick = function() {
+    // Switches from pen and eraser.
+    document.getElementById("pen").onmouseClick = function() {
         setMode("pen");
         canvas.style.cursor = 'url("../img/cursors/pencil.png") 0 20, pointer';
     }
-    document.getElementById("rubber").onclick = function() {
+    document.getElementById("rubber").onmouseClick = function() {
         setMode("eraser");
         canvas.style.cursor = 'url("../img/cursors/eraser.bmp") 0 0, pointer';
     }
 
-    //Esconde o menu de contexto ao clicar fora.
-    document.getElementsByTagName("body")[0].onclick = function() {
+    // Hides context menu when clicked outside it.
+    document.getElementsByTagName("body")[0].onmouseClick = function() {
         document.getElementById("canvas-ctnx-menu").style.display = "none";
     }
 
 }
 
-    //--------------------------------------------------------------EVENTOS DA TELA---------------------------------------------------
-
-/**
- * Deve ser chamado no evento onMouseMove do canvas#screen.
- * Executa a ação selecionada conforme o mouse é clicado e movido.
- */
 function canvasMouseMove(e) {
     mouseMovingStatus = true;
-    if ((mousePosition && mouseMovingStatus) && !isPointersNext(mousePosition, lastMousePosition)) {
-        lastMousePosition.x = mousePosition.x;
-        lastMousePosition.y = mousePosition.y;
+    if ((currentMousePosition && mouseMovingStatus) && !isPointersNext(currentMousePosition, lastMousePosition)) {
+        lastMousePosition.x = currentMousePosition.x;
+        lastMousePosition.y = currentMousePosition.y;
     }
-    mousePosition.x = (e.clientX || e.pageX);// / (window.innerWidth/canvas.width);
-    mousePosition.y = (e.clientY || e.pageY);// / (window.innerHeight/canvas.height);
+    currentMousePosition.x = (e.clientX || e.pageX);// / (window.innerWidth/canvas.width);
+    currentMousePosition.y = (e.clientY || e.pageY);// / (window.innerHeight/canvas.height);
     
     draw();
 }
 
-/**
- * Evento disparado quando o usuário clica com o mouse sobre a tela de pintura(canvas).
- */
-function canvasOnClick(e) {
+function canvasonmouseClick(e) {
     var color = document.getElementById("color-picker").value;
     switch (mode) {
     case "pen":
         if (mouseMovingStatus) {
-            if (!isPointersNext(mousePosition, lastMousePosition)) {
-                drawLine(screenContext, lastMousePosition, mousePosition, brushSize, color);
+            if (!isPointersNext(currentMousePosition, lastMousePosition)) {
+                drawLine(screenContext, lastMousePosition, currentMousePosition, brushSize, color);
             }
         } else {
-            drawCircle(screenContext, mousePosition.x, mousePosition.y, brushSize/2, color);//60%
+            drawCircle(screenContext, currentMousePosition.x, currentMousePosition.y, brushSize/2, color);//60%
         }
         break;
 
     case "eraser":
         screenContext.globalCompositeOperation = "destination-out";
-//        drawCircle(screenContext, mousePosition.x + 10, mousePosition.y + 10, 20, "white");
-        drawRect(screenContext, mousePosition.x, mousePosition.y, 20, 20, "white");
+        drawRect(screenContext, currentMousePosition.x, currentMousePosition.y, 20, 20, "white");
         screenContext.globalCompositeOperation = "source-over";
         break;
     default:
@@ -121,17 +102,10 @@ function canvasOnClick(e) {
     }
 }
 
-/**
- * Evento disparado quando o mouse é solto.
- */
 function bodyMouseUp() {
-    //"Avisa" quando o mouse é solto fora do canvas.
-    click = false;
+    mouseClicking = false;
 }
 
-/**
- * Evento do botao salvar do menu de contexto.
- */
 function save() {
     var image = canvas.toDataURL("image/png");
     var saveButton = document.getElementById("save-button");
@@ -139,9 +113,7 @@ function save() {
     saveButton.setAttribute("href", image);
 }
 
-/**
- * Evento chamado ao redimensionar a janela, evita que se perca a imagem.
- */
+// Workarround for not losing painting when user resizes window.
 function onResize() {
     var image = new Image();
     image.id = "pic";
@@ -150,25 +122,22 @@ function onResize() {
     screenContext.drawImage(image, 0, 0);
     return false;
 }
-//---------------------------------------------------------FUNCOES GENERICAS---------------------------------------------
+//---------------------------------------------------------GENERIC FUNCTIONS---------------------------------------------
 
-/**
- * Executa a ação selecionada pelo usuário caso o mouse seja clicado.
- */
 function draw() {
-    if (click) {
-        canvasOnClick();
+    if (mouseClicking) {
+        canvasonmouseClick();
     }
 }
 
 /**
- * Desenha um círculo no contexto passado por parametro.
+ * Draws a circle in the context.
  * 
- * @param context contexto a ser desenhado
- * @param x posição x do centro do círculo
- * @param y posição y do centro do círculo
- * @param radius raio do círculo
- * @param color cor de preenchimento do círculo
+ * @param context to be drawn
+ * @param x central x axis of circle
+ * @param y central y axis of circle
+ * @param radius
+ * @param color
  */
 function drawCircle(context, x, y, radius, color) {
     context.fillStyle = color;
@@ -178,14 +147,14 @@ function drawCircle(context, x, y, radius, color) {
 }
 
 /**
- * Desenha um retângulo no contexto passado por parâmetro.
+ * Draws a rectangle in the context.
  * 
- * @param context contexto a ser desenhado
- * @param x posição x onde começa o retângulo
- * @param y posição y onde começa o retângulo
- * @param width largura do retângulo
- * @param height altura do retângulo
- * @param color cor do retângulo
+ * @param context to be drown
+ * @param x axis where the rect start
+ * @param y axis where the rect start
+ * @param width
+ * @param height
+ * @param color
  */
 function drawRect(context, x, y, width, height, color) {
     context.rect(x, y, width, height);
@@ -194,31 +163,13 @@ function drawRect(context, x, y, width, height, color) {
 }
 
 /**
- * Preenche uma área a partir das coordenadas passadas por parametro.
+ * Draws a rectangle in the context.
  * 
- * @param context O contexto no qual será realizado a ação.
- * @param x A posição x do ponto de partida.
- * @param y A posição y do ponto de partida.
- * @param color A cor de preenchimento.
- */
-function fillColor(context, x, y, color) {
-    //TODO: implementar esse método de acordo com a documentação
-    var imgData = screenContext.getImageData(0, 0, canvas.width, canvas.height);
-    return;
-    for(var i = y; imgData.data.length; i+=4) {
-        //pegar a cor do pixel atual;
-        console.log(imgData.data[i]);
-    }
-}
-
-/**
- * Desenha uma linha no contexto passado por parâmetro.
- * 
- * @param context contexto a ser desenhado
- * @param from object{x, y} onde começa a linha
- * @param to object{x, y} onde termina a linha
- * @param width largura da linha em pixels
- * @param color cor da linha
+ * @param context
+ * @param from object{x, y} start point
+ * @param to object{x, y} end point
+ * @param width
+ * @param color
  */
 function drawLine(context, from, to, width, color) {
     context.lineWidth = width;
@@ -230,32 +181,41 @@ function drawLine(context, from, to, width, color) {
     context.stroke();
 }
 
-/**
- * Seta o tamanho do canvas (largura igual da tela e altura tela - 100 pixels).
- */
-function configureCanvasSize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+function fillColor(context, x, y, color) {
+    //TODO: fill area with color passed as parameter.
+    var imgData = screenContext.getImageData(0, 0, canvas.width, canvas.height);
+    return;
+    for(var i = y; imgData.data.length; i+=4) {
+        //pegar a cor do pixel atual;
+        console.log(imgData.data[i]);
+    }
 }
 
 /**
- * Inverte o valor da variável click.
+ * Sets canva's size (uses screen width and screen height minus 100 pixels).
+ */
+function configureCanvasSize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight - 100;
+}
+
+/**
+ * Inverts mouse state(clicking, not clicking).
  */
 function canvasMouseUpDown(event) {
     contextMenu = document.getElementById("canvas-ctnx-menu");
-    if (event.which != 1 || /*agora é verificado se o menu de contexto está aparecendo*/ contextMenu.style.display == "block") {
-        //Evita que o usuario pinte usando
-        //o botao direito ou o do meio.
-        //Ou quando o menu de contexto estiver sendo exibido.
+    if (event.which != 1 || contextMenu.style.display == "block") {
+        // Prevents user paint using right or middle mouse button.
+        // And when context menu is being shown.
         return false;
     }
     mouseMovingStatus = false;
-    click = !click;
+    mouseClicking = !mouseClicking;
     draw();
 }
 
 /**
- * Seta o modo de desenho (caneta ou borracha)
+ * sets tool (pen or rubber)
  * @param m
  */
 function setMode(m) {
@@ -263,24 +223,26 @@ function setMode(m) {
 }
 
 /**
- * Retorna se dois pontos no plano cartesiano sao proximos
+ * Compares if two points are next.
+ *
  * @param p1
  * @param p2
- * @returns {Boolean} se os pontos passados por parametro tem diferença de até 10
+ * @returns {Boolean} if points are next.
  */
 function isPointersNext(p1, p2) {
     return isNext(p1.x, p2.x) && isNext(p1.y, p2.y);
 }
 
 /**
- * Retorna se dois numeros sao proximos
+ * Compares if two numbers are next
+ *
  * @param x
  * @param y
- * @returns {Boolean} se os numeros passados por parametro tem diferença de até 10
+ * @returns {Boolean} if numbers difference is less then 10
  */
 function isNext(x, y) {
     var next = false;
-    for (var int = 0; int < 3; int++) {//FUTURE: Algum valor aqui precisa ser alterado para que a precisão da captura do mouse ao desenhar seja configurada.
+    for (var int = 0; int < 3; int++) {
         next = (x - int == y) || (x + int == y);
         if (next) {
             break;
@@ -289,15 +251,15 @@ function isNext(x, y) {
     return (x == y) || next;
 }
 
-/*
- * Abre o menu de contexto do canvas
+/**
+ * Opens context menu
  *
  */
 function openCanvasContextMenu() {
     contextMenu = document.getElementById("canvas-ctnx-menu");
     contextMenu.style.display = "block";
     contextMenu.style.position = "absolute";
-    contextMenu.style.top = mousePosition.y + "px";
-    contextMenu.style.left = mousePosition.x + "px";
+    contextMenu.style.top = currentMousePosition.y + "px";
+    contextMenu.style.left = currentMousePosition.x + "px";
     return false;
 }
