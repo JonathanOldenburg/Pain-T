@@ -192,7 +192,7 @@ function fillColor(context, x, y, color) {
 }
 
 /**
- * Sets canva's size (uses screen width and screen height minus 100 pixels).
+ * Sets canvas' size (uses screen width and screen height minus 100 pixels).
  */
 function configureCanvasSize() {
     canvas.width = window.innerWidth;
